@@ -26,17 +26,13 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
     <script src="js/modernizr.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script>
-      (function () {
-        emailjs.init({
-          publicKey: "gcsta-BZQTJ9kGrKe",
-        });
-      })();
-    </script>
 
     <!-- Load Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+    ></script>
   </head>
   <body id="page-top" class="politics_version">
     <!-- LOADER -->
@@ -690,31 +686,34 @@
                       <input
                         class="form-control"
                         id="name"
-                        name="name"
                         type="text"
                         placeholder="Your Name"
                         required
+                        data-validation-required-message="Please enter your name."
                       />
+                      <p class="help-block text-danger"></p>
                     </div>
                     <div class="form-group">
                       <input
                         class="form-control"
                         id="email"
-                        name="email"
                         type="email"
                         placeholder="Your Email"
                         required
+                        data-validation-required-message="Please enter your email address."
                       />
+                      <p class="help-block text-danger"></p>
                     </div>
                     <div class="form-group">
                       <input
                         class="form-control"
                         id="phone"
-                        name="phone"
                         type="tel"
                         placeholder="Your Phone"
                         required
+                        data-validation-required-message="Please enter your phone number."
                       />
+                      <p class="help-block text-danger"></p>
                     </div>
                   </div>
 
@@ -758,6 +757,7 @@
             </div>
           </div>
         </div>
+        <!-- end row -->
       </div>
       <!-- end container -->
     </div>
@@ -808,35 +808,11 @@
     <a href="#" id="scroll-to-top" class="dmtop global-radius"
       ><i class="fa fa-angle-up"></i
     ></a>
-    <script>
-      document
-        .getElementById("contactForm")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
 
-          // reCAPTCHA validation
-          if (grecaptcha.getResponse() === "") {
-            alert("Please verify that you are not a robot.");
-            return;
-          }
-
-          // ارسال ایمیل با EmailJS
-          emailjs.sendForm("service_6kjlllo", "template_z7ts26l", this).then(
-            function () {
-              alert("Message sent successfully!");
-              document.getElementById("contactForm").reset();
-              grecaptcha.reset(); // reset reCAPTCHA
-            },
-            function (error) {
-              alert("FAILED... " + JSON.stringify(error));
-            }
-          );
-        });
-    </script>
     <!-- ALL JS FILES -->
     <script src="js/all.js"></script>
     <!-- Camera Slider -->
-    <script src="js/jquery.mobile.customized.min.js"></script>
+    <!--<script src="js/jquery.mobile.customized.min.js"></script>-->
     <script src="js/jquery.easing.1.3.js"></script>
     <script src="js/parallaxie.js"></script>
     <script src="js/headline.js"></script>
