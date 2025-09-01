@@ -17,9 +17,24 @@ $(function () {
         alert("Please verify that you are not a robot.");
         return;
       }
+
+      var form = event.target;
+      var data = {
+        name: form.name.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        message: form.message.value,
+      };
+      // console.log("Data to be sent:", data);
+
       // ارسال ایمیل با EmailJS
       emailjs
-        .sendForm("service_6kjlllo", "template_z7ts26l", "#contactForm")
+        .send("service_6kjlllo", "template_z7ts26l", {
+          name: form.name.value,
+          message: form.message.value,
+          email: form.email.value,
+          phone: form.phone.value,
+        })
         .then(
           function () {
             // Success message
