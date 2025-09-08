@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>محاسبه هزینه تمام شده کالا</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        direction: rtl;
+        text-align: right;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"] {
+        width: calc(100% - 22px);
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .item-wrapper {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #eee;
+        background-color: #fcfcfc;
+        border-radius: 5px;
+      }
+      .item-input {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 10px;
+        align-items: end;
+      }
+      .item-input > div {
+        display: flex;
+        flex-direction: column;
+      }
+      .item-input label {
+        font-weight: normal;
+        margin-bottom: 3px;
+        font-size: 0.9em;
+        color: #555;
+      }
+      #items-container {
+        margin-top: 20px;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #d4edda;
+        background-color: #d4edda;
+        color: #155724;
+        border-radius: 4px;
+      }
+
+      /* Style for inputs that will show formatted numbers */
+      .formatted-number-input {
+        text-align: left; /* To make numbers align to the left */
+        direction: ltr; /* To make numbers appear left-to-right */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>محاسبه هزینه تمام شده کالا (میانگین وزنی)</h2>
+
+      <div class="form-group">
+        <label for="fixedCosts">هزینه‌های ثابت (پول پیک، سوخت و سایر):</label>
+        <input
+          type="text"
+          id="fixedCosts"
+          class="formatted-number-input"
+          value="0"
+          inputmode="numeric"
+          oninput="allowOnlyDigits(this)"
+          onfocusout="formatNumberInput(this)"
+        />
+      </div>
+
+      <div id="items-container">
+        <h3>مشخصات کالاها:</h3>
+        <div class="item-wrapper">
+          <div class="item-input">
+            <div>
+              <label for="item-name-0">نام کالا:</label>
+              <input
+                type="text"
+                id="item-name-0"
+                placeholder="مثال: گوشی موبایل"
+                class="item-name"
+              />
+            </div>
+            <div>
+              <label for="item-quantity-0">تعداد:</label>
+              <input
+                type="text"
+                id="item-quantity-0"
+                placeholder="تعداد کالا"
+                class="item-quantity formatted-number-input"
+                value="1"
+                inputmode="numeric"
+                oninput="allowOnlyDigits(this)"
+                onfocusout="formatNumberInput(this)"
+              />
+            </div>
+            <div>
+              <label for="item-price-0">قیمت خرید واحد:</label>
+              <input
+                type="text"
+                id="item-price-0"
+                placeholder="قیمت هر واحد کالا"
+                class="item-price formatted-number-input"
+                value="0"
+                inputmode="numeric"
+                oninput="allowOnlyDigits(this)"
+                onfocusout="formatNumberInput(this)"
+              />
+            </div>
+            <div></div>
+            <!-- Empty div for alignment -->
+          </div>
+        </div>
+      </div>
+      <button onclick="addItem()">افزودن کالای جدید</button>
+      <hr />
+      <button onclick="calculateCosts()">محاسبه هزینه تمام شده</button>
+
+      <div id="result" class="result" style="display: none">
+        <h3>نتایج محاسبه:</h3>
+        <p>مجموع هزینه‌های ثابت: <span id="displayFixedCosts"></span></p>
+        <p>مجموع ارزش خرید کالاها: <span id="totalPurchaseValue"></span></p>
+        <p>مجموع تعداد کالاها: <span id="totalQuantity"></span></p>
+        <p>کل هزینه (خرید + ثابت): <span id="totalOverallCost"></span></p>
+        <h4>هزینه تمام شده هر کالا:</h4>
+        <ul id="itemCostList"></ul>
+      </div>
+    </div>
+
+    <script>
+      let itemCounter = 0; // To ensure unique IDs for new items
+
+      // Function to format numbers with thousand separators
+      function formatNumber(num) {
+        if (num === null || isNaN(num)) return "";
+        return Math.round(num).toLocaleString("fa-IR"); // Use 'fa-IR' for Persian numbers, or 'en-US' for English numbers
+      }
+
+      // Function to clean up formatted number for calculation
+      function cleanNumber(formattedNum) {
+        if (!formattedNum) return 0;
+        // تبدیل ارقام فارسی به انگلیسی
+        const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+        let englishNum = formattedNum.replace(/[^\d۰-۹]/g, "");
+        englishNum = englishNum.replace(/[۰-۹]/g, (d) =>
+          persianDigits.indexOf(d)
+        );
+        return parseInt(englishNum, 10) || 0;
+      }
+      function allowOnlyDigits(inputElement) {
+        inputElement.value = inputElement.value.replace(/[^\d]/g, "");
+      }
+      // Event handler to format input as user types
+      function formatNumberInput(inputElement) {
+        let value = inputElement.value;
+        // ذخیره موقعیت کرسر قبل از تغییر مقدار
+        let selectionStart = inputElement.selectionStart;
+        let cleanedValue = value.replace(/[^\d]/g, "");
+
+        if (cleanedValue === "") {
+          inputElement.value = "";
+          return;
+        }
+
+        let num = parseInt(cleanedValue, 10);
+        if (isNaN(num)) {
+          inputElement.value = "";
+          return;
+        }
+
+        // فرمت عدد
+        let formatted = formatNumber(num);
+        inputElement.value = formatted;
+
+        // تنظیم مجدد موقعیت کرسر
+        // اگر مقدار تغییر کرده، کرسر را به انتها ببرید
+        inputElement.setSelectionRange(
+          inputElement.value.length,
+          inputElement.value.length
+        );
+      }
+
+      function addItem() {
+        itemCounter++;
+        const container = document.getElementById("items-container");
+        const newItemWrapper = document.createElement("div");
+        newItemWrapper.classList.add("item-wrapper");
+        newItemWrapper.innerHTML = `
+    <div class="item-input">
+      <div>
+        <label for="item-name-${itemCounter}">نام کالا:</label>
+        <input type="text" id="item-name-${itemCounter}" placeholder="مثال: گوشی موبایل" class="item-name">
+      </div>
+      <div>
+        <label for="item-quantity-${itemCounter}">تعداد:</label>
+        <input
+          type="text"
+          id="item-quantity-${itemCounter}"
+          placeholder="تعداد کالا"
+          class="item-quantity formatted-number-input"
+          value="1"
+          inputmode="numeric"
+          oninput="allowOnlyDigits(this)"
+          onfocusout="formatNumberInput(this)"
+        >
+      </div>
+      <div>
+        <label for="item-price-${itemCounter}">قیمت خرید واحد:</label>
+        <input
+          type="text"
+          id="item-price-${itemCounter}"
+          placeholder="قیمت هر واحد کالا"
+          class="item-price formatted-number-input"
+          value="0"
+          inputmode="numeric"
+          oninput="allowOnlyDigits(this)"
+          onfocusout="formatNumberInput(this)"
+        >
+      </div>
+      <div>
+        <button onclick="removeItem(this)">حذف</button>
+      </div>
+    </div>
+  `;
+        container.appendChild(newItemWrapper);
+
+        // Re-apply formatting to the new elements if they have initial values
+        newItemWrapper
+          .querySelectorAll(".formatted-number-input")
+          .forEach((input) => {
+            formatNumberInput(input);
+          });
+      }
+
+      function removeItem(button) {
+        button.closest(".item-wrapper").remove();
+      }
+
+      function calculateCosts() {
+        const fixedCosts = cleanNumber(
+          document.getElementById("fixedCosts").value
+        );
+        const itemNames = document.querySelectorAll(".item-name");
+        const itemQuantities = document.querySelectorAll(".item-quantity");
+        const itemPrices = document.querySelectorAll(".item-price");
+
+        let totalPurchaseValue = 0;
+        let totalQuantity = 0;
+        const items = [];
+
+        for (let i = 0; i < itemQuantities.length; i++) {
+          const name = itemNames[i].value || `کالا ${i + 1}`;
+          const quantity = cleanNumber(itemQuantities[i].value);
+          const price = cleanNumber(itemPrices[i].value);
+
+          if (quantity > 0 && price >= 0) {
+            const itemValue = quantity * price;
+            totalPurchaseValue += itemValue;
+            totalQuantity += quantity;
+            items.push({ name, quantity, price, value: itemValue });
+          }
+        }
+
+        const totalOverallCost = totalPurchaseValue + fixedCosts;
+
+        document.getElementById("displayFixedCosts").textContent =
+          formatNumber(fixedCosts);
+        document.getElementById("totalPurchaseValue").textContent =
+          formatNumber(totalPurchaseValue);
+        document.getElementById("totalQuantity").textContent =
+          formatNumber(totalQuantity);
+        document.getElementById("totalOverallCost").textContent =
+          formatNumber(totalOverallCost);
+
+        const itemCostList = document.getElementById("itemCostList");
+        itemCostList.innerHTML = ""; // Clear previous results
+
+        if (totalQuantity === 0) {
+          itemCostList.innerHTML =
+            "<li>تعداد کل کالاها باید بیشتر از صفر باشد.</li>";
+          document.getElementById("result").style.display = "block";
+          return;
+        }
+
+        items.forEach((item) => {
+          // محاسبه سهم هر کالا از ارزش کل خرید
+          const weight = item.value / totalPurchaseValue;
+          // محاسبه سهم هر کالا از هزینه‌های ثابت
+          const fixedCostShare = fixedCosts * weight;
+          // هزینه تمام شده واحد با میانگین وزنی
+          const finalCostPerUnit =
+            (item.value + fixedCostShare) / item.quantity;
+
+          const listItem = document.createElement("li");
+          listItem.textContent = `${item.name} (تعداد: ${formatNumber(
+            item.quantity
+          )}, قیمت خرید واحد: ${formatNumber(
+            item.price
+          )}): هزینه تمام شده واحد: ${formatNumber(finalCostPerUnit)}`;
+          itemCostList.appendChild(listItem);
+        });
+
+        document.getElementById("result").style.display = "block";
+      }
+
+      // Initial formatting for the first item and fixed costs
+      document.addEventListener("DOMContentLoaded", () => {
+        formatNumberInput(document.getElementById("fixedCosts"));
+        formatNumberInput(document.getElementById("item-quantity-0"));
+        formatNumberInput(document.getElementById("item-price-0"));
+      });
+    </script>
+  </body>
+</html>
