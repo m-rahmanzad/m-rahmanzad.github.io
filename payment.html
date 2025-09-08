@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ماشین حساب اقساطی</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f4f7f6;
+        color: #333;
+        direction: rtl; /* برای پشتیبانی از زبان فارسی */
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+      }
+
+      h1 {
+        color: #007bff;
+        margin-bottom: 25px;
+        font-size: 2em;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        text-align: right; /* برای تراز کردن متن فارسی */
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+      }
+
+      input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box; /* برای اینکه padding به width اضافه نشود */
+        font-size: 1.1em;
+      }
+
+      button {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.2em;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #218838;
+      }
+
+      .results {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        text-align: right; /* برای تراز کردن نتایج */
+      }
+
+      .results h2 {
+        color: #007bff;
+        margin-bottom: 15px;
+        font-size: 1.8em;
+      }
+
+      .results p {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        line-height: 1.6;
+      }
+
+      .results span {
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+        }
+        h1 {
+          font-size: 1.8em;
+        }
+        input[type="number"],
+        button {
+          font-size: 1em;
+          padding: 10px;
+        }
+        .results h2 {
+          font-size: 1.6em;
+        }
+        .results p {
+          font-size: 1.1em;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px;
+        }
+        h1 {
+          font-size: 1.6em;
+        }
+        .results h2 {
+          font-size: 1.4em;
+        }
+        .results p {
+          font-size: 1em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ماشین حساب اقساطی</h1>
+      <div class="input-group">
+        <label for="itemValue">ارزش کالا (تومان):</label>
+        <input
+          type="text"
+          id="itemValue"
+          placeholder="مثال: 1000000"
+          class="formatted-number-input"
+          inputmode="numeric"
+          oninput="allowOnlyDigits(this)"
+          onfocusout="formatNumberInput(this)"
+        />
+      </div>
+      <div class="input-group">
+        <label for="installments">تعداد اقساط:</label>
+        <input
+          type="text"
+          id="installments"
+          placeholder="مثال: 12"
+          class="formatted-number-input"
+          inputmode="numeric"
+          oninput="allowOnlyDigits(this)"
+          onfocusout="formatNumberInput(this)"
+        />
+      </div>
+      <div class="input-group">
+        <label for="interestRate">نرخ سود هر قسط (درصد):</label>
+        <input
+          type="text"
+          id="interestRate"
+          placeholder="مثال: 2"
+          class="formatted-number-input"
+          inputmode="numeric"
+          oninput="allowOnlyDigits(this)"
+          onfocusout="formatNumberInput(this)"
+        />
+      </div>
+      <button onclick="calculateInstallments()">محاسبه</button>
+
+      <div id="results" class="results">
+        <h2>نتایج:</h2>
+        <p>مقدار پرداختی کل: <span id="totalPayment">0</span> تومان</p>
+        <p>مقدار هر قسط: <span id="monthlyInstallment">0</span> تومان</p>
+      </div>
+    </div>
+
+    <script>
+      function formatNumber(num) {
+        if (num === null || isNaN(num)) return "";
+        return Math.round(num).toLocaleString("fa-IR");
+      }
+
+      function cleanNumber(formattedNum) {
+        if (!formattedNum) return 0;
+        const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+        let englishNum = formattedNum.replace(/[^\d۰-۹]/g, "");
+        englishNum = englishNum.replace(/[۰-۹]/g, (d) =>
+          persianDigits.indexOf(d)
+        );
+        return parseInt(englishNum, 10) || 0;
+      }
+
+      function allowOnlyDigits(inputElement) {
+        inputElement.value = inputElement.value.replace(/[^\d]/g, "");
+      }
+
+      function formatNumberInput(inputElement) {
+        let value = inputElement.value;
+        let cleanedValue = value.replace(/[^\d]/g, "");
+        if (cleanedValue === "") {
+          inputElement.value = "";
+          return;
+        }
+        let num = parseInt(cleanedValue, 10);
+        if (isNaN(num)) {
+          inputElement.value = "";
+          return;
+        }
+        let formatted = formatNumber(num);
+        inputElement.value = formatted;
+        inputElement.setSelectionRange(
+          inputElement.value.length,
+          inputElement.value.length
+        );
+      }
+      function calculateInstallments() {
+        const itemValue = cleanNumber(
+          document.getElementById("itemValue").value
+        );
+        const installments = cleanNumber(
+          document.getElementById("installments").value
+        );
+        const interestRate = cleanNumber(
+          document.getElementById("interestRate").value
+        );
+
+        if (isNaN(itemValue) || itemValue <= 0) {
+          alert("لطفاً یک ارزش کالا معتبر وارد کنید.");
+          return;
+        }
+        if (isNaN(installments) || installments <= 0) {
+          alert("لطفاً تعداد اقساط معتبر وارد کنید.");
+          return;
+        }
+        if (isNaN(interestRate) || interestRate < 0) {
+          alert("لطفاً یک نرخ سود معتبر (درصد) وارد کنید.");
+          return;
+        }
+
+        const actualInterestRate = interestRate / 100;
+        const totalPayment =
+          itemValue + itemValue * actualInterestRate * installments;
+        const monthlyInstallment = totalPayment / installments;
+
+        document.getElementById("totalPayment").innerText =
+          formatNumber(totalPayment);
+        document.getElementById("monthlyInstallment").innerText =
+          formatNumber(monthlyInstallment);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        formatNumberInput(document.getElementById("itemValue"));
+        formatNumberInput(document.getElementById("installments"));
+        formatNumberInput(document.getElementById("interestRate"));
+      });
+    </script>
+  </body>
+</html>
