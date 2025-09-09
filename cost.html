@@ -133,8 +133,7 @@
           class="formatted-number-input"
           value="0"
           inputmode="numeric"
-          oninput="allowOnlyDigits(this)"
-          onfocusout="formatNumberInput(this)"
+          oninput="formatNumberInput(this)"
         />
       </div>
 
@@ -160,7 +159,7 @@
                 class="item-quantity formatted-number-input"
                 value="1"
                 inputmode="numeric"
-                onfocusout="formatNumberInput(this)"
+                oninput="formatNumberInput(this)"
               />
             </div>
             <div>
@@ -172,7 +171,7 @@
                 class="item-price formatted-number-input"
                 value="0"
                 inputmode="numeric"
-                onfocusout="formatNumberInput(this)"
+                oninput="formatNumberInput(this)"
               />
             </div>
             <div></div>
@@ -219,28 +218,23 @@
       // Event handler to format input as user types
       function formatNumberInput(inputElement) {
         let value = inputElement.value;
-        let cleanedValue = value.replace(/[^\d]/g, "");
-        if (cleanedValue === "") {
+        // تبدیل ارقام فارسی به انگلیسی و حذف جداکننده‌ها
+        value = value.replace(/[^\d۰-۹]/g, "");
+        // تبدیل ارقام فارسی به انگلیسی
+        const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+        value = value.replace(/[۰-۹]/g, (d) => persianDigits.indexOf(d));
+        if (value === "") {
           inputElement.value = "";
           return;
         }
-
-        let num = parseInt(cleanedValue, 10);
+        let num = parseInt(value, 10);
         if (isNaN(num)) {
           inputElement.value = "";
           return;
         }
-
         // فرمت عدد
         let formatted = formatNumber(num);
         inputElement.value = formatted;
-
-        // تنظیم مجدد موقعیت کرسر
-        // اگر مقدار تغییر کرده، کرسر را به انتها ببرید
-        inputElement.setSelectionRange(
-          inputElement.value.length,
-          inputElement.value.length
-        );
       }
 
       function addItem() {
@@ -263,7 +257,7 @@
           class="item-quantity formatted-number-input"
           value="1"
           inputmode="numeric"
-          onfocusout="formatNumberInput(this)"
+          oninput="formatNumberInput(this)"
         >
       </div>
       <div>
@@ -275,7 +269,7 @@
           class="item-price formatted-number-input"
           value="0"
           inputmode="numeric"
-          onfocusout="formatNumberInput(this)"
+          oninput="formatNumberInput(this)"
         >
       </div>
       <div>
