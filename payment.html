@@ -141,8 +141,7 @@
           placeholder="مثال: 1000000"
           class="formatted-number-input"
           inputmode="numeric"
-          oninput="allowOnlyDigits(this)"
-          onfocusout="formatNumberInput(this)"
+          oninput="formatNumberInput(this)"
         />
       </div>
       <div class="input-group">
@@ -153,8 +152,7 @@
           placeholder="مثال: 12"
           class="formatted-number-input"
           inputmode="numeric"
-          oninput="allowOnlyDigits(this)"
-          onfocusout="formatNumberInput(this)"
+          oninput="formatNumberInput(this)"
         />
       </div>
       <div class="input-group">
@@ -165,8 +163,7 @@
           placeholder="مثال: 2"
           class="formatted-number-input"
           inputmode="numeric"
-          oninput="allowOnlyDigits(this)"
-          onfocusout="formatNumberInput(this)"
+          oninput="formatNumberInput(this)"
         />
       </div>
       <button onclick="calculateInstallments()">محاسبه</button>
@@ -200,22 +197,23 @@
 
       function formatNumberInput(inputElement) {
         let value = inputElement.value;
-        let cleanedValue = value.replace(/[^\d]/g, "");
-        if (cleanedValue === "") {
+        // تبدیل ارقام فارسی به انگلیسی و حذف جداکننده‌ها
+        value = value.replace(/[^\d۰-۹]/g, "");
+        // تبدیل ارقام فارسی به انگلیسی
+        const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+        value = value.replace(/[۰-۹]/g, (d) => persianDigits.indexOf(d));
+        if (value === "") {
           inputElement.value = "";
           return;
         }
-        let num = parseInt(cleanedValue, 10);
+        let num = parseInt(value, 10);
         if (isNaN(num)) {
           inputElement.value = "";
           return;
         }
+        // فرمت عدد
         let formatted = formatNumber(num);
         inputElement.value = formatted;
-        inputElement.setSelectionRange(
-          inputElement.value.length,
-          inputElement.value.length
-        );
       }
       function calculateInstallments() {
         const itemValue = cleanNumber(
