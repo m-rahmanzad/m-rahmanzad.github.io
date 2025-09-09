@@ -223,10 +223,7 @@
       // Event handler to format input as user types
       function formatNumberInput(inputElement) {
         let value = inputElement.value;
-        // ذخیره موقعیت کرسر قبل از تغییر مقدار
-        let selectionStart = inputElement.selectionStart;
         let cleanedValue = value.replace(/[^\d]/g, "");
-
         if (cleanedValue === "") {
           inputElement.value = "";
           return;
