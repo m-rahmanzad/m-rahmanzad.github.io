@@ -160,7 +160,6 @@
                 class="item-quantity formatted-number-input"
                 value="1"
                 inputmode="numeric"
-                oninput="allowOnlyDigits(this)"
                 onfocusout="formatNumberInput(this)"
               />
             </div>
@@ -173,7 +172,6 @@
                 class="item-price formatted-number-input"
                 value="0"
                 inputmode="numeric"
-                oninput="allowOnlyDigits(this)"
                 onfocusout="formatNumberInput(this)"
               />
             </div>
@@ -217,9 +215,7 @@
         );
         return parseInt(englishNum, 10) || 0;
       }
-      function allowOnlyDigits(inputElement) {
-        inputElement.value = inputElement.value.replace(/[^\d]/g, "");
-      }
+
       // Event handler to format input as user types
       function formatNumberInput(inputElement) {
         let value = inputElement.value;
@@ -267,7 +263,6 @@
           class="item-quantity formatted-number-input"
           value="1"
           inputmode="numeric"
-          oninput="allowOnlyDigits(this)"
           onfocusout="formatNumberInput(this)"
         >
       </div>
@@ -280,7 +275,6 @@
           class="item-price formatted-number-input"
           value="0"
           inputmode="numeric"
-          oninput="allowOnlyDigits(this)"
           onfocusout="formatNumberInput(this)"
         >
       </div>
