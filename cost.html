@@ -346,12 +346,20 @@
           const finalCostPerUnit =
             (item.value + fixedCostShare) / item.quantity;
 
+          // قیمت نماینده و تک فروشی
+          const agentPrice = finalCostPerUnit * 1.1;
+          const retailPrice = finalCostPerUnit * 1.2;
+
           const listItem = document.createElement("li");
           listItem.textContent = `${item.name} (تعداد: ${formatNumber(
             item.quantity
           )}, قیمت خرید واحد: ${formatNumber(
             item.price
-          )}): هزینه تمام شده واحد: ${formatNumber(finalCostPerUnit)}`;
+          )}): هزینه تمام شده واحد: ${formatNumber(
+            finalCostPerUnit
+          )} , قیمت نماینده: ${formatNumber(
+            agentPrice
+          )} , قیمت تک فروشی: ${formatNumber(retailPrice)}`;
           itemCostList.appendChild(listItem);
         });
 
