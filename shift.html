@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>برنامه شیفت کاری</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0099ff;
+      color: white;
+      cursor: pointer;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 70%;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    tr:nth-child(even) { background: #2a2a2a; }
+  </style>
+</head>
+<body>
+
+  <h2>📅 برنامه شیفت کاری من</h2>
+  <p>الگو: ۲ روز روزکار → ۲ روز شب‌کار → ۲ روز تعطیل (چرخه‌ای)</p>
+
+  <label>تاریخ شروع شیفت (اولین روز شیفت روز):</label>
+  <input type="date" id="startDate">
+  <button onclick="generateSchedule()">نمایش برنامه</button>
+
+  <table id="scheduleTable">
+    <thead>
+      <tr>
+        <th>تاریخ</th>
+        <th>روز هفته</th>
+        <th>نوع شیفت</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const shifts = ["روز", "روز", "شب", "شب", "تعطیل", "تعطیل"];
+
+    function generateSchedule() {
+      const startInput = document.getElementById('startDate').value;
+      if (!startInput) {
+        alert("لطفاً تاریخ شروع را وارد کنید.");
+        return;
+      }
+
+      const startDate = new Date(startInput);
+      const tbody = document.querySelector("#scheduleTable tbody");
+      tbody.innerHTML = "";
+
+      for (let i = 0; i < 30; i++) { // نمایش 30 روز آینده
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+        const dayName = currentDate.toLocaleDateString('fa-IR', { weekday: 'long' });
+        const shiftType = shifts[i % shifts.length];
+
+        const row = `<tr>
+          <td>${currentDate.toLocaleDateString('fa-IR')}</td>
+          <td>${dayName}</td>
+          <td>${shiftType}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+  </script>
+
+</body>
+</html>
