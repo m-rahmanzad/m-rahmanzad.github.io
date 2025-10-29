@@ -2,6 +2,7 @@
 <html lang="fa">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rojin Paya</title>
     <link
       rel="stylesheet"
@@ -9,54 +10,130 @@
     />
     <style>
       body {
-        font-family: sans-serif;
+        font-family: "Vazirmatn", sans-serif;
         direction: rtl;
         background: #1a1a1a;
         color: #fff;
         text-align: center;
         padding: 30px;
+        margin: 0;
       }
+
+      h2,
+      h3,
+      p,
+      label {
+        margin: 10px 0;
+      }
+
       input,
       button {
-        padding: 10px;
-        margin: 5px;
-        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 8px 4px;
+        border-radius: 10px;
         border: none;
         font-size: 16px;
+        width: 220px;
+        max-width: 90%;
       }
+
       button {
         background-color: #0099ff;
         color: white;
         cursor: pointer;
+        transition: background 0.3s;
       }
-      table {
-        margin: 20px auto;
+
+      button:hover {
+        background-color: #007acc;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+      }
+
+      .shift-table {
         border-collapse: collapse;
-        width: 80%;
+        width: 100%;
+        min-width: 200px;
+        background-color: #222;
+        border-radius: 10px;
+        overflow: hidden;
       }
+
       th,
       td {
-        border: 1px solid #555;
+        border: 1px solid #444;
         padding: 10px;
-        border-radius: 4px;
+        font-size: 15px;
       }
+
+      th {
+        background: #333;
+      }
+
       tr:nth-child(even) {
         background: #2a2a2a;
       }
+
       .روز {
         color: #00ff88;
         font-weight: bold;
       }
+
       .شب {
         color: #66aaff;
         font-weight: bold;
       }
+
       .تعطیل {
         color: #cccccc;
         font-weight: bold;
       }
+
+      h3 {
+        margin-top: 40px;
+        color: #888;
+        font-size: 14px;
+      }
+
+      /* ✅ حالت موبایل */
+      @media (max-width: 600px) {
+        body {
+          padding: 15px;
+        }
+
+        h2 {
+          font-size: 20px;
+        }
+
+        p {
+          font-size: 14px;
+        }
+
+        input,
+        button {
+          display: block;
+          width: 100%;
+          margin: 8px auto;
+          font-size: 15px;
+        }
+
+        th,
+        td {
+          padding: 8px;
+          font-size: 14px;
+        }
+
+        table {
+          font-size: 14px;
+          min-width: unset;
+        }
+      }
     </style>
   </head>
+
   <body>
     <h2>📅 برنامه شیفت کاری</h2>
     <p>الگو: ۲ روز روزکار ← ۲ روز شب‌کار ← ۲ روز تعطیل</p>
@@ -65,16 +142,18 @@
     <input type="text" id="startDate" placeholder="انتخاب تاریخ" />
     <button onclick="generateSchedule()">نمایش برنامه</button>
 
-    <table id="shiftTable">
-      <thead>
-        <tr>
-          <th>تاریخ شمسی</th>
-          <th>روز هفته</th>
-          <th>نوع شیفت</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="table-container">
+      <table id="shiftTable" class="shift-table">
+        <thead>
+          <tr>
+            <th>تاریخ شمسی</th>
+            <th>روز هفته</th>
+            <th>نوع شیفت</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
@@ -82,10 +161,8 @@
 
     <script>
       $(document).ready(function () {
-        // 🟢 تنظیم اولیه تقویم شمسی
         $("#startDate").persianDatepicker({
           format: "YYYY/MM/DD",
-          initialValue: false,
           initialValue: false,
           autoClose: true,
           observer: true,
@@ -93,7 +170,6 @@
         });
       });
 
-      // ✅ تابع تبدیل اعداد فارسی به انگلیسی
       function fixNumbers(str) {
         return str.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
       }
@@ -105,22 +181,13 @@
           return;
         }
 
-        console.log("تاریخ انتخاب‌شده:", startDateStr);
-
-        // 🟢 تبدیل اعداد فارسی به انگلیسی
         let enDateStr = fixNumbers(startDateStr);
-        console.log("تاریخ انگلیسی‌شده:", enDateStr);
-
-        // 🟢 جدا کردن سال، ماه، روز
         let parts = enDateStr.split("/");
         let y = parseInt(parts[0]);
         let m = parseInt(parts[1]);
         let d = parseInt(parts[2]);
 
-        // 🟢 ساخت صحیح تاریخ شمسی
         let startDate = new persianDate([y, m, d]);
-        console.log("تاریخ شمسی معتبر:", startDate.format("YYYY/MM/DD"));
-
         let tbody = $("#shiftTable tbody");
         tbody.empty();
 
@@ -128,20 +195,19 @@
 
         for (let i = 0; i < 30; i++) {
           let date = startDate.clone().add("days", i);
-
           let dayOfWeek = date.format("dddd");
           let shiftType = shifts[i % 6];
 
           let row = `<tr>
-                  <td>${date.format("YYYY/MM/DD")}</td>
-                  <td>${dayOfWeek}</td>
-                  <td class="${shiftType}">${shiftType}</td>
-                </tr>`;
+                      <td>${date.format("YYYY/MM/DD")}</td>
+                      <td>${dayOfWeek}</td>
+                      <td class="${shiftType}">${shiftType}</td>
+                    </tr>`;
           tbody.append(row);
         }
       }
     </script>
+
     <h3>Made By M.R</h3>
   </body>
 </html>
-
