@@ -58,8 +58,8 @@
     </style>
   </head>
   <body>
-    <h2>📅 برنامه شیفت کاری C</h2>
-    <p>الگو: ۲ روز روزکار → ۲ روز شب‌کار → ۲ روز تعطیل</p>
+    <h2>📅 برنامه شیفت کاری</h2>
+    <p>الگو: ۲ روز روزکار ← ۲ روز شب‌کار ← ۲ روز تعطیل</p>
 
     <label>تاریخ شروع (اولین روز شیفت روز):</label>
     <input type="text" id="startDate" placeholder="انتخاب تاریخ" />
@@ -82,11 +82,17 @@
 
     <script>
       $(document).ready(function () {
+        // 🟢 تنظیم اولیه تقویم شمسی
         $("#startDate").persianDatepicker({
           format: "YYYY/MM/DD",
           initialValue: false,
         });
       });
+
+      // ✅ تابع تبدیل اعداد فارسی به انگلیسی
+      function fixNumbers(str) {
+        return str.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+      }
 
       function generateSchedule() {
         let startDateStr = $("#startDate").val();
@@ -95,28 +101,42 @@
           return;
         }
 
-        let startDate = new persianDate(startDateStr).toDate();
+        console.log("تاریخ انتخاب‌شده:", startDateStr);
+
+        // 🟢 تبدیل اعداد فارسی به انگلیسی
+        let enDateStr = fixNumbers(startDateStr);
+        console.log("تاریخ انگلیسی‌شده:", enDateStr);
+
+        // 🟢 جدا کردن سال، ماه، روز
+        let parts = enDateStr.split("/");
+        let y = parseInt(parts[0]);
+        let m = parseInt(parts[1]);
+        let d = parseInt(parts[2]);
+
+        // 🟢 ساخت صحیح تاریخ شمسی
+        let startDate = new persianDate([y, m, d]);
+        console.log("تاریخ شمسی معتبر:", startDate.format("YYYY/MM/DD"));
+
         let tbody = $("#shiftTable tbody");
         tbody.empty();
 
         const shifts = ["روز", "روز", "شب", "شب", "تعطیل", "تعطیل"];
 
         for (let i = 0; i < 30; i++) {
-          let date = new Date(startDate);
-          date.setDate(date.getDate() + i);
-          let pDate = new persianDate(date);
+          let date = startDate.clone().add("days", i);
 
-          let dayOfWeek = pDate.format("dddd"); // ✅ نام روز هفته شمسی
+          let dayOfWeek = date.format("dddd");
           let shiftType = shifts[i % 6];
 
           let row = `<tr>
-                    <td>${pDate.format("YYYY/MM/DD")}</td>
-                    <td>${dayOfWeek}</td>
-                    <td class="${shiftType}">${shiftType}</td> <!-- ✅ اعمال رنگ -->
+                  <td>${date.format("YYYY/MM/DD")}</td>
+                  <td>${dayOfWeek}</td>
+                  <td class="${shiftType}">${shiftType}</td>
                 </tr>`;
           tbody.append(row);
         }
       }
     </script>
+    <h3>Made By M.R</h3>
   </body>
 </html>
