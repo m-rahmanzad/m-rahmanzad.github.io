@@ -86,6 +86,10 @@
         $("#startDate").persianDatepicker({
           format: "YYYY/MM/DD",
           initialValue: false,
+          initialValue: false,
+          autoClose: true,
+          observer: true,
+          altField: "#startDateAlt",
         });
       });
 
@@ -140,3 +144,4 @@
     <h3>Made By M.R</h3>
   </body>
 </html>
+
