@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rojin Paya</title>
+
+    <!-- JalaliDatePicker -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"
+      href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css"
     />
+    <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+
     <style>
       body {
         font-family: "Vazirmatn", sans-serif;
@@ -17,13 +21,6 @@
         text-align: center;
         padding: 30px;
         margin: 0;
-      }
-
-      h2,
-      h3,
-      p,
-      label {
-        margin: 10px 0;
       }
 
       input,
@@ -98,37 +95,15 @@
         font-size: 14px;
       }
 
-      /* ✅ حالت موبایل */
       @media (max-width: 600px) {
         body {
           padding: 15px;
         }
-
-        h2 {
-          font-size: 20px;
-        }
-
-        p {
-          font-size: 14px;
-        }
-
         input,
         button {
           display: block;
           width: 100%;
           margin: 8px auto;
-          font-size: 15px;
-        }
-
-        th,
-        td {
-          padding: 8px;
-          font-size: 14px;
-        }
-
-        table {
-          font-size: 14px;
-          min-width: unset;
         }
       }
     </style>
@@ -138,8 +113,14 @@
     <h2>📅 برنامه شیفت کاری</h2>
     <p>الگو: ۲ روز روزکار ← ۲ روز شب‌کار ← ۲ روز تعطیل</p>
 
-    <label>تاریخ شروع (اولین روز شیفت روز):</label>
-    <input type="text" id="startDate" placeholder="انتخاب تاریخ" />
+    <label for="startDate">تاریخ شروع (اولین روز شیفت روز):</label>
+    <input
+      type="text"
+      id="startDate"
+      data-jdp
+      placeholder="انتخاب تاریخ"
+      autocomplete="off"
+    />
     <button onclick="generateSchedule()">نمایش برنامه</button>
 
     <div class="table-container">
@@ -155,32 +136,24 @@
       </table>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <h3>Made By M.R</h3>
+
     <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
 
     <script>
-      $(document).ready(function () {
-        $("#startDate").persianDatepicker({
-          format: "YYYY/MM/DD",
-          initialValue: false,
-          autoClose: true,
-          observer: true,
-          altField: "#startDateAlt",
-        });
-      });
+      // فعال‌سازی JalaliDatePicker
+      jalaliDatepicker.startWatch();
 
       function fixNumbers(str) {
         return str.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
       }
 
       function generateSchedule() {
-        let startDateStr = $("#startDate").val();
+        let startDateStr = document.getElementById("startDate").value;
         if (!startDateStr) {
           alert("لطفاً تاریخ شروع را وارد کنید");
           return;
         }
-
         let enDateStr = fixNumbers(startDateStr);
         let parts = enDateStr.split("/");
         let y = parseInt(parts[0]);
@@ -188,8 +161,8 @@
         let d = parseInt(parts[2]);
 
         let startDate = new persianDate([y, m, d]);
-        let tbody = $("#shiftTable tbody");
-        tbody.empty();
+        let tbody = document.querySelector("#shiftTable tbody");
+        tbody.innerHTML = "";
 
         const shifts = ["روز", "روز", "شب", "شب", "تعطیل", "تعطیل"];
 
@@ -203,11 +176,9 @@
                       <td>${dayOfWeek}</td>
                       <td class="${shiftType}">${shiftType}</td>
                     </tr>`;
-          tbody.append(row);
+          tbody.insertAdjacentHTML("beforeend", row);
         }
       }
     </script>
-
-    <h3>Made By M.R</h3>
   </body>
 </html>
