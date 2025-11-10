@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rojin Paya</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css"
+    />
+    <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+
+    <style>
+      body {
+        font-family: "Vazirmatn", sans-serif;
+        direction: rtl;
+        background: #1a1a1a;
+        color: #fff;
+        text-align: center;
+        padding: 30px;
+        margin: 0;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+      }
+
+      .shift-table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 200px;
+        background-color: #222;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        border: 1px solid #444;
+        padding: 10px;
+        font-size: 15px;
+      }
+
+      th {
+        background: #333;
+      }
+
+      tr:nth-child(even) {
+        background: #2a2a2a;
+      }
+
+      .روز {
+        color: #00ff88;
+        font-weight: bold;
+      }
+
+      .شب {
+        color: #66aaff;
+        font-weight: bold;
+      }
+
+      .تعطیل {
+        color: #cccccc;
+        font-weight: bold;
+      }
+
+      h3 {
+        margin-top: 40px;
+        color: #888;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>📅  برنامه شیفت کاری C</h2>
+    <p>الگو: ۲ روز روزکار ← ۲ روز شب‌کار ← ۲ روز تعطیل</p>
+
+    <div class="table-container">
+      <table id="shiftTable" class="shift-table">
+        <thead>
+          <tr>
+            <th>تاریخ شمسی</th>
+            <th>روز هفته</th>
+            <th>نوع شیفت</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>Made By M.R</h3>
+
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+
+    <script>
+      // تاریخ پایه (اولین روز شیفت روز)
+      const baseDate = new persianDate([1404, 8, 15]);
+
+      function generateSchedule() {
+        const today = new persianDate();
+        const tbody = document.querySelector("#shiftTable tbody");
+        tbody.innerHTML = "";
+
+        const diffDays = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24));
+        const shifts = ["روز", "روز", "شب", "شب", "تعطیل", "تعطیل"];
+
+        for (let i = 0; i < 30; i++) {
+          const date = today.clone().add("days", i);
+          const dayOfWeek = date.format("dddd");
+          const shiftType = shifts[(diffDays + i) % 6];
+
+          const row = `<tr>
+                        <td>${date.format("YYYY/MM/DD")}</td>
+                        <td>${dayOfWeek}</td>
+                        <td class="${shiftType}">${shiftType}</td>
+                      </tr>`;
+          tbody.insertAdjacentHTML("beforeend", row);
+        }
+      }
+
+      // اجرای خودکار بعد از بارگذاری کامل صفحه
+      window.addEventListener("load", generateSchedule);
+    </script>
+  </body>
+</html>
