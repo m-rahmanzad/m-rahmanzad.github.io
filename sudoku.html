@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudoku Game</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+	display: flex;
+    flex-direction: column;
+}
+
+.container {
+	flex: 1 0 auto;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,.2);
+    max-width: 95vw;
+}
+
+table {
+    border-collapse: collapse;
+    margin: auto;
+}
+
+td {
+    border: 1px solid #999;
+}
+
+input {
+    width: min(10vw, 45px);
+    height: min(10vw, 45px);
+    font-size: min(6vw, 20px);
+    text-align: center;
+    border: none;
+    caret-color: transparent;
+    background: none;
+}
+
+input:focus {
+    outline: none;
+}
+
+.fixed {
+    background: #e0e0e0;
+    font-weight: bold;
+}
+
+.wrong { color: red; }
+.correct { color: black; }
+
+.highlight {
+    background: #fff3cd;
+}
+.footer {
+	flex-shrink: 0;
+    text-align: center;
+    padding: 10px;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 0 0 10px 10px;
+    margin-top: 15px;
+}
+
+/* رسپانسیو */
+@media (max-width: 600px) {
+    .footer {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+tr:nth-child(3n) td { border-bottom: 2px solid black; }
+td:nth-child(3n) { border-right: 2px solid black; }
+tr:first-child td { border-top: 2px solid black; }
+td:first-child { border-left: 2px solid black; }
+
+.controls {
+    text-align: center;
+    margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <div class="controls">
+        <select id="difficulty">
+            <option value="easy">آسان</option>
+            <option value="medium">متوسط</option>
+            <option value="hard">سخت</option>
+            <option value="veryhard">خیلی سخت</option>
+        </select>
+        <button onclick="newGame()">شروع بازی</button>
+    </div>
+
+    <table id="sudoku"></table>
+</div>
+
+<script>
+const SIZE = 9;
+const table = document.getElementById("sudoku");
+let solution = [];
+let mistakeCount = 0;
+let gameOver = false;
+
+const difficultyMap = {
+    easy: 40,
+    medium: 50,
+    hard: 55,
+    veryhard: 60
+};
+
+// ساخت جدول
+for (let r = 0; r < SIZE; r++) {
+    const row = document.createElement("tr");
+    for (let c = 0; c < SIZE; c++) {
+        const td = document.createElement("td");
+        const input = document.createElement("input");
+        input.maxLength = 1;
+
+input.addEventListener("input", () => {
+    if (gameOver) {
+        input.value = "";
+        return;
+    }
+
+    if (!/^[1-9]$/.test(input.value)) {
+        input.value = "";
+        input.classList.remove("wrong","correct");
+        return;
+    }
+
+    if (parseInt(input.value) === solution[r][c]) {
+        input.classList.add("correct");
+        input.classList.remove("wrong");
+        checkWin();
+    } else {
+        input.classList.add("wrong");
+        input.classList.remove("correct");
+
+        mistakeCount++;
+
+        if (mistakeCount >= 3) {
+            gameOver = true;
+            lockBoard();
+            alert("بازی تمام شد! متأسفانه باختی.");
+        }
+    }
+});
+
+
+        input.addEventListener("focus", () => highlight(r,c));
+        input.addEventListener("blur", clearHighlight);
+
+        td.appendChild(input);
+        row.appendChild(td);
+    }
+    table.appendChild(row);
+}
+
+// هایلایت
+function highlight(r,c) {
+    clearHighlight();
+    for (let i=0;i<SIZE;i++) {
+        table.rows[r].cells[i].classList.add("highlight");
+        table.rows[i].cells[c].classList.add("highlight");
+    }
+}
+function clearHighlight() {
+    document.querySelectorAll(".highlight").forEach(e=>e.classList.remove("highlight"));
+}
+
+// بازی جدید
+function newGame() {
+    mistakeCount = 0;
+    gameOver = false;
+
+    const diff = document.getElementById("difficulty").value;
+    const removeCount = difficultyMap[diff];
+
+    let grid = emptyGrid();
+    solveSudoku(grid);
+    solution = JSON.parse(JSON.stringify(grid));
+
+    removeCells(grid, removeCount);
+    render(grid);
+}
+function lockBoard() {
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            table.rows[r].cells[c].firstChild.readOnly = true;
+        }
+    }
+}
+
+
+function render(grid) {
+    for (let r=0;r<SIZE;r++) {
+        for (let c=0;c<SIZE;c++) {
+            const input = table.rows[r].cells[c].firstChild;
+            input.className = "";
+            if (grid[r][c]) {
+                input.value = grid[r][c];
+                input.readOnly = true;
+                input.classList.add("fixed");
+            } else {
+                input.value = "";
+                input.readOnly = false;
+            }
+        }
+    }
+}
+
+// منطق تولید
+function emptyGrid() {
+    return Array.from({length:SIZE},()=>Array(SIZE).fill(0));
+}
+
+function removeCells(grid, count) {
+    while(count>0) {
+        const r=Math.floor(Math.random()*9);
+        const c=Math.floor(Math.random()*9);
+        if(grid[r][c]!==0) {
+            grid[r][c]=0;
+            count--;
+        }
+    }
+}
+
+// برد
+function checkWin() {
+	if (gameOver) return;
+    for (let r=0;r<SIZE;r++)
+        for (let c=0;c<SIZE;c++) {
+            const input=table.rows[r].cells[c].firstChild;
+            if (!input.readOnly && parseInt(input.value)!==solution[r][c]) return;
+        }
+
+    const d=document.getElementById("difficulty").selectedOptions[0].text;
+    alert(`من مصطفی رحمن زاد به تو تبریک می‌گم که تونستی این جدول رو با درجه سختی ${d} حل کنی`);
+}
+
+// حل سودوکو با اعداد بهم‌ریخته
+function solveSudoku(grid) {
+    const pos=findEmpty(grid);
+    if(!pos) return true;
+    const [r,c]=pos;
+
+    for (const n of shuffledNumbers()) {
+        if (isValid(grid,r,c,n)) {
+            grid[r][c]=n;
+            if (solveSudoku(grid)) return true;
+            grid[r][c]=0;
+        }
+    }
+    return false;
+}
+
+function shuffledNumbers() {
+    const a=[1,2,3,4,5,6,7,8,9];
+    for(let i=a.length-1;i>0;i--) {
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+}
+
+function findEmpty(g) {
+    for(let r=0;r<9;r++)
+        for(let c=0;c<9;c++)
+            if(g[r][c]===0) return [r,c];
+    return null;
+}
+
+function isValid(g,r,c,n) {
+    for(let i=0;i<9;i++)
+        if(g[r][i]===n||g[i][c]===n) return false;
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for(let i=br;i<br+3;i++)
+        for(let j=bc;j<bc+3;j++)
+            if(g[i][j]===n) return false;
+    return true;
+}
+</script>
+</body>
+<div>
+<footer class="footer">
+    <p>By M.R & M.Y</p>
+</footer>
+</div>
+</html>
